@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8"><meta name="theme-color" content="#141310"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Minha Criança, Meu Império — versão web de ficheiro único</title>
+<style>
+:root{--gold:#e4bd55;--bg:#101014;--panel:#202027;--line:#51452a;--muted:#c9c2b2;--green:#83dfa4;--red:#ff9292}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#101014,#272116);color:#fff8e8;font:16px system-ui,Arial,sans-serif}
+header{text-align:center;padding:22px 14px 18px;border-bottom:2px solid #80652b;background:#141310}
+.logo{font-size:42px}h1{font-size:clamp(21px,5vw,30px);color:var(--gold);margin:4px 0}header p{margin:5px;color:var(--muted)}
+main{max-width:940px;margin:auto;padding:14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:13px}
+h2{color:var(--gold);font-size:19px;margin:0 0 10px}.muted{color:var(--muted);font-size:14px}.stat{font-size:24px;font-weight:800}
+button,input,select{font:inherit;border-radius:10px;padding:10px;border:1px solid #92783a}
+button{background:var(--gold);color:#17130a;font-weight:750;margin:5px 4px 0 0;cursor:pointer}button.alt{background:#37343a;color:white;border-color:#777}button:disabled{opacity:.4}
+input,select{width:100%;background:#121216;color:white;margin:5px 0 8px}
+label{display:block;color:var(--muted);font-size:14px;margin-top:7px}.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.tile{background:#29251d;border:1px solid #51452a;border-radius:12px;padding:11px;margin:8px 0}
+.notice{background:#29251d;border-radius:10px;padding:11px;margin-top:10px;min-height:40px}.good{color:var(--green)}.bad{color:var(--red)}
+.bigemoji{font-size:28px}footer{text-align:center;color:var(--muted);padding:18px;font-size:13px}
+
+.mission{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #51452a}
+.progress{height:8px;background:#39352c;border-radius:10px;overflow:hidden;margin-top:6px}.progress i{display:block;height:100%;background:var(--green)}
+input[type=number]{max-width:100%}
+</style></head>
+<body>
+<header><div class="logo">👑 🐐 🪙</div><h1>MINHA CRIANÇA, MEU IMPÉRIO</h1>
+<p>Aprende hoje. Constrói o teu futuro. Governa o teu império.</p><p><b>A coroa não é herdada. É construída.</b></p>
+<div class="row" style="justify-content:center;margin-top:12px;gap:12px">
+ <label style="margin:0">🌍 <select id="language" aria-label="Idioma do jogo" style="width:auto">
+ <option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option>
+ <option value="es">Español</option><option value="ar">العربية</option><option value="zh">中文</option></select></label>
+ <span class="tile" style="margin:0">🧒 <b id="playerName">Pequeno empreendedor</b></span>
+</div></header>
+<main>
+<div class="grid">
+ <div class="card"><div class="muted">📅 Dia</div><div class="stat" id="day">1</div></div>
+ <div class="card"><div class="muted">💰 Carteira</div><div class="stat" id="cash">10.000 Kz</div></div>
+ <div class="card"><div class="muted">🏦 Poupança</div><div class="stat" id="bank">0 Kz</div></div>
+ <div class="card"><div class="muted">📦 Valor do stock</div><div class="stat" id="stockValue">0 Kz</div></div>
+ <div class="card"><div class="muted">📈 Lucro líquido</div><div class="stat" id="result">0 Kz</div></div>
+ <div class="card"><div class="muted">⭐ Experiência</div><div class="stat" id="xp">0 XP</div></div>
+</div>
+<div class="card"><h2>🏪 A tua primeira loja</h2><p class="muted">Escolhe o fornecedor, compra mercadoria e vende. Não precisas de vender tudo pelo preço mais baixo: pensa no custo e no cliente.</p>
+<div id="products"></div></div>
+<div class="grid">
+ <div class="card"><h2>🚚 Fornecedores</h2><p class="muted">Cada fornecedor tem um preço e uma qualidade diferente.</p><label>Escolhe o fornecedor</label><select id="supplier"><option value="0">Fornecedor A — económico</option><option value="1">Fornecedor B — qualidade superior</option></select><div id="supplierInfo" class="notice">Fornecedor A: preço mais baixo.</div></div>
+ <div class="card"><h2>🏷️ Concorrência</h2><p class="muted">Uma loja vizinha também vende os mesmos produtos. Compara os preços antes de escolher o teu.</p><div id="competitor" class="tile"></div><label>Preço de venda para o próximo produto</label><input id="sellPrice" type="number" min="1" placeholder="Preço em Kz"><button onclick="setPrice()">Aplicar preço</button></div>
+</div>
+<div class="grid">
+ <div class="card"><h2>🧹 Equipa e despesas</h2><p class="muted">Podes contratar ajuda para organizar a loja. O pagamento é uma despesa regular desta demonstração.</p><div id="staffInfo"></div><button id="hireBtn" onclick="hire()">Contratar ajudante — 1.500 Kz</button><button id="wageBtn" class="alt" onclick="payWage()">Pagar salário — 500 Kz</button><button class="alt" onclick="payTransport()">Pagar transporte — 500 Kz</button><div id="costLog" class="notice">Ainda não registaste despesas nesta sessão.</div></div>
+ <div class="card"><h2>🏬 Abrir uma segunda loja</h2><p class="muted">Primeiro aprende a gerir uma loja. Depois podes expandir o teu pequeno império.</p><div id="branchInfo" class="tile"></div><button id="branchBtn" onclick="openBranch()">Abrir loja de sumos — 5.000 Kz</button></div>
+</div>
+
+<div class="grid">
+ <div class="card"><h2>🏦 Banco do Império</h2><p class="muted">Guarda dinheiro para os teus objetivos ou levanta quando precisares. O banco paga 1% de juros por cada dia concluído sobre a poupança.</p>
+ <label>Valor para movimentar (Kz)</label><input id="bankAmount" type="number" min="1" step="1" value="1000">
+ <button onclick="deposit()">Depositar</button><button class="alt" onclick="withdraw()">Levantar</button><div class="notice" id="bankInfo">A tua poupança cresce com disciplina.</div></div>
+ <div class="card"><h2>💳 Crédito responsável</h2><p class="muted">Podes pedir um pequeno empréstimo educativo. Deves devolver o valor mais 5% de juros. Não peças dinheiro sem saber como vais pagar.</p>
+ <div class="tile">Dívida atual: <b id="debt">0 Kz</b></div><label>Valor do empréstimo (máximo 3.000 Kz)</label><input id="loanAmount" type="number" min="1" max="3000" step="1" value="1000">
+ <button onclick="takeLoan()">Pedir empréstimo</button><button class="alt" onclick="repayLoan()">Pagar dívida</button><div class="notice" id="loanInfo">Crédito é uma responsabilidade, não rendimento.</div></div>
+</div>
+<div class="grid">
+ <div class="card"><h2>📊 Investimento</h2><p class="muted">Investe em conhecimento e ferramentas para melhorar o negócio. O retorno é educativo e previsível nesta simulação: 10% após três dias.</p>
+ <div id="investmentInfo" class="tile">Nenhum investimento ativo.</div><label>Valor a investir (Kz)</label><input id="investmentAmount" type="number" min="500" step="100" value="1000"><button onclick="invest()">Investir por três dias</button><button class="alt" onclick="collectInvestment()">Receber retorno</button></div>
+ <div class="card"><h2>🎯 Missões e recompensas</h2><p class="muted">Cumpre objetivos para ganhar experiência e aprender hábitos financeiros.</p><div id="missions"></div></div>
+</div>
+<div class="card"><h2>🗺️ Caminho do Império</h2>
+ <p class="muted">Avança por etapas. Cada nível ensina uma competência financeira nova.</p>
+ <div id="journey"></div>
+</div>
+<div class="card"><h2>🌾 Quinta do Império</h2>
+ <p class="muted">Compra sementes, planta, espera a colheita e vende no mercado. Também podes criar uma cabra para produzir leite. Tudo usa dinheiro fictício.</p>
+ <div class="grid">
+  <div class="tile"><div class="bigemoji">🌱</div><b>Terreno agrícola</b><p id="farmLandInfo" class="muted">Ainda não tens terreno.</p><button id="landBtn" onclick="buyLand()">Comprar terreno — 3.000 Kz</button></div>
+  <div class="tile"><div class="bigemoji">🐐</div><b>Criação de cabras</b><p id="goatInfo" class="muted">Ainda não tens cabra.</p><button id="goatBtn" onclick="buyGoat()">Comprar cabra — 2.500 Kz</button></div>
+ </div>
+ <div class="grid">
+  <div class="tile"><div class="bigemoji">🌽</div><b>Plantação</b><p id="cropInfo" class="muted">Compra um terreno para começar.</p><button id="seedBtn" onclick="plantCrops()">Plantar sementes — 300 Kz</button><button class="alt" id="harvestBtn" onclick="harvestCrops()">Colher produção</button><button class="alt" id="cropSellBtn" onclick="sellCrops()">Vender colheita (120 Kz/un.)</button></div>
+  <div class="tile"><div class="bigemoji">🥛</div><b>Leite fresco</b><p id="milkInfo" class="muted">O leite aparece quando a cabra produz.</p><button id="milkBtn" onclick="sellMilk()">Vender leite — 350 Kz</button></div>
+ </div>
+ <div class="notice" id="farmLesson">Aprende: a agricultura exige investimento, tempo, cuidados e planeamento.</div>
+</div>
+<div class="card"><h2>🧠 Escola do Dinheiro</h2>
+ <p class="muted">Responde aos desafios para aprender a tomar decisões financeiras. Cada pergunta certa dá 20 XP, uma única vez.</p>
+ <div class="tile"><div class="row"><b id="quizTopic">Desafio financeiro</b><span id="quizCount">Pergunta 1</span></div>
+ <h3 id="quizQuestion">A carregar pergunta…</h3><div id="quizAnswers"></div>
+ <div id="quizFeedback" class="notice">Escolhe uma resposta.</div>
+ <button class="alt" onclick="nextQuestion()">Próxima pergunta</button></div>
+ <div class="muted">Respostas certas: <b id="quizScore">0</b> • XP ganhos: <b id="quizXP">0</b></div>
+</div>
+<div class="card"><h2>📚 Dicionário do dinheiro</h2>
+ <details class="tile"><summary><b>Receita</b></summary>Dinheiro que entra, por exemplo, quando vendes um produto.</details>
+ <details class="tile"><summary><b>Despesa</b></summary>Dinheiro que sai para pagar algo, como transporte ou salários.</details>
+ <details class="tile"><summary><b>Lucro</b></summary>O que sobra depois de subtrair os custos e as despesas às receitas.</details>
+ <details class="tile"><summary><b>Poupança</b></summary>Parte do dinheiro que guardas para objetivos e imprevistos.</details>
+ <details class="tile"><summary><b>Investimento</b></summary>Uso de recursos hoje para tentar obter benefícios no futuro, sabendo que pode haver riscos.</details>
+ <details class="tile"><summary><b>Dívida</b></summary>Dinheiro que recebeste emprestado e tens obrigação de devolver.</details>
+</div>
+<div class="card"><h2>🧠 Desafio do empreendedor</h2><p id="challenge">Consegue vender um produto com lucro sem esquecer as despesas?</p><div class="notice" id="lesson">Dica: lucro não é o mesmo que receita. Receita é o dinheiro das vendas; lucro é o que sobra depois dos custos.</div></div>
+<div class="row"><button onclick="nextDay()">⏭ Terminar o dia</button><button class="alt" onclick="resetGame()">Reiniciar demonstração</button><span class="muted">O progresso fica guardado neste navegador.</span></div>
+<div class="card"><b>🛡️ Lembra-te:</b> este jogo usa dinheiro fictício. Pede ajuda a um adulto de confiança antes de qualquer decisão financeira na vida real. Não introduzas dados bancários verdadeiros.</div></main><footer>Jogo educativo infantil v0.9 • Apenas dinheiro virtual • Aprendizagem simulada • Sem pagamentos reais • Sem imagens de pessoas</footer>
+
+<script>
+const base={cash:10000,bank:0,net:0,revenue:0,cogs:0,expenses:0,debt:0,staff:false,branch:false,selectedSupplier:0,day:1,xp:0,investment:null,missions:{firstSale:false,save:false,profit:false,repay:false},badges:{},quizScore:0,quizXP:0,quizAnswered:[],quizIndex:0,land:false,goat:false,crop:null,cropStock:0,milkStock:0,items:[
+{name:'🍞 Pão',base:100,price:160,stock:0,competitor:170},
+{name:'🧃 Sumo',base:250,price:370,stock:0,competitor:350},
+{name:'📒 Caderno',base:300,price:450,stock:0,competitor:430},
+{name:'🧼 Sabão',base:200,price:310,stock:0,competitor:320}]};
+let s;
+try{s={...JSON.parse(localStorage.getItem('mcmi_v09')),items:JSON.parse(localStorage.getItem('mcmi_v09')).items||base.items}}catch(e){s=JSON.parse(JSON.stringify(base))}
+if(!s||!Number.isFinite(s.cash))s=JSON.parse(JSON.stringify(base));
+let chosen=0;
+const fmt=n=>Math.round(n).toLocaleString('pt-PT')+' Kz';
+const el=id=>document.getElementById(id);
+function save(){localStorage.setItem('mcmi_v09',JSON.stringify(s));render()}
+function say(t,ok=true){el('lesson').textContent=t;el('lesson').className='notice '+(ok?'good':'bad')}
+function cost(p){return Math.round(p.base*(s.selectedSupplier===0?1:1.18))}
+function completeMission(k,msg){if(!s.missions[k]){s.missions[k]=true;s.xp+=50;s.cash+=250;say('Missão concluída: '+msg+' Recompensa: 250 Kz e 50 XP.');}}
+
+const quiz=[
+{topic:'Poupança',q:'Recebeste 2.000 Kz. Qual é uma boa atitude?',a:['Gastar tudo imediatamente','Guardar uma parte para um objetivo','Emprestar tudo sem combinar'],c:1,why:'Guardar uma parte ajuda-te a preparar objetivos e imprevistos.'},
+{topic:'Lucro',q:'Compraste um produto por 500 Kz e vendeste por 700 Kz. Qual é o lucro bruto?',a:['200 Kz','500 Kz','1.200 Kz'],c:0,why:'Lucro bruto = preço de venda menos custo: 700 − 500 = 200 Kz.'},
+{topic:'Orçamento',q:'Para que serve um orçamento?',a:['Para adivinhar o futuro','Para planear receitas e despesas','Para gastar sem limites'],c:1,why:'Um orçamento ajuda a decidir como usar o dinheiro antes de o gastar.'},
+{topic:'Dívida',q:'Antes de pedir um empréstimo, deves…',a:['Pensar como vais pagar','Pedir o máximo possível','Ignorar os juros'],c:0,why:'É importante conhecer os juros, o prazo e a capacidade de pagamento.'},
+{topic:'Investimento',q:'Um investimento pode…',a:['Garantir lucro sempre','Ter retorno e também risco','Nunca perder valor'],c:1,why:'Investimentos podem trazer ganhos, mas não existe lucro garantido.'},
+{topic:'Negócio',q:'Se o preço de venda for menor que o custo, normalmente…',a:['Tens prejuízo por unidade','Tens lucro maior','Não há diferença'],c:0,why:'Vender abaixo do custo significa perder dinheiro em cada unidade, antes das outras despesas.'},
+{topic:'Necessidades',q:'Qual destas é geralmente uma necessidade?',a:['Um brinquedo novo','Água potável','O telemóvel mais caro'],c:1,why:'Necessidades são coisas essenciais para viver e estar bem.'},
+{topic:'Segurança',q:'O que deves fazer com a tua palavra-passe bancária?',a:['Partilhar com amigos','Publicar nas redes sociais','Manter secreta e protegida'],c:2,why:'Nunca partilhes palavras-passe, códigos ou dados bancários.'}
+];
+function showQuestion(){
+ const q=quiz[s.quizIndex%quiz.length];
+ el('quizTopic').textContent=q.topic;el('quizCount').textContent='Pergunta '+(s.quizIndex+1);
+ el('quizQuestion').textContent=q.q;
+ el('quizAnswers').innerHTML=q.a.map((a,i)=>'<button class="alt" style="display:block;width:100%;text-align:left" onclick="answerQuestion('+i+')">'+String.fromCharCode(65+i)+'. '+a+'</button>').join('');
+ el('quizFeedback').textContent=s.quizAnswered.includes(s.quizIndex)?'Já respondeste a esta pergunta. Podes avançar para outra.':'Escolhe uma resposta.';
+}
+function answerQuestion(i){
+ if(s.quizAnswered.includes(s.quizIndex)){el('quizFeedback').textContent='Esta pergunta já foi respondida. Avança para a próxima.';return;}
+ const q=quiz[s.quizIndex%quiz.length];
+ if(i===q.c){s.quizScore=(s.quizScore||0)+1;s.quizXP=(s.quizXP||0)+20;s.xp+=20;say('Resposta certa! '+q.why);el('quizFeedback').textContent='🎉 Muito bem! '+q.why;}
+ else{el('quizFeedback').textContent='Quase! A resposta correta é: '+q.a[q.c]+'. '+q.why;}
+ s.quizAnswered.push(s.quizIndex);s.saveQuiz=true;save();
+ [...el('quizAnswers').querySelectorAll('button')].forEach(b=>b.disabled=true);
+}
+function nextQuestion(){s.quizIndex++;save();showQuestion();}
+function render(){
+el('day').textContent=s.day;el('cash').textContent=fmt(s.cash);el('bank').textContent=fmt(s.bank);
+el('stockValue').textContent=fmt(s.items.reduce((a,p)=>a+p.stock*cost(p),0));
+el('result').textContent=fmt(s.revenue-s.cogs-s.expenses-(s.debt>0?0:0));
+el('xp').textContent=s.xp+' XP';el('debt').textContent=fmt(s.debt);
+el('quizScore').textContent=s.quizScore||0;el('quizXP').textContent=s.quizXP||0;
+el('farmLandInfo').textContent=s.land?'Terreno comprado. Podes cultivar.':'Compra um terreno para começar a plantar.';
+el('landBtn').disabled=!!s.land||s.cash<3000;
+el('goatInfo').textContent=s.goat?'Tens uma cabra. Leite disponível: '+(s.milkStock||0)+' unidade(s).':'Ainda não tens animais.';
+el('goatBtn').disabled=!!s.goat||s.cash<2500;
+el('cropInfo').textContent=s.crop?'Plantação a crescer. Colhe a partir do dia '+s.crop.readyDay+'.':'Sementes disponíveis para plantar: '+(s.land?'sim':'compra primeiro um terreno')+'. Stock colhido: '+(s.cropStock||0);
+el('seedBtn').disabled=!s.land||!!s.crop||s.cash<300;
+el('harvestBtn').disabled=!s.crop||s.day<s.crop.readyDay;
+el('milkInfo').textContent='Leite em stock: '+(s.milkStock||0)+' • Produção a cada 2 dias.';
+el('milkBtn').disabled=(s.milkStock||0)<1;el('cropSellBtn').disabled=(s.cropStock||0)<1;
+
+
+const level=Math.floor(s.xp/200)+1, names=['Aprendiz','Poupador','Comerciante','Investidor','Mestre do Império'];
+el('levelText').textContent='Nível '+level+' — '+(names[Math.min(level-1,names.length-1)]);
+el('levelBar').style.width=((s.xp%200)/200*100)+'%';
+el('levelHint').textContent=(200-(s.xp%200))+' XP para o próximo nível.';
+el('badges').innerHTML=[['firstSale','🥇 Primeira venda'],['save','🐷 Poupador'],['profit','📈 Lucro positivo'],['repay','🤝 Dívida paga']].filter(x=>s.missions[x[0]]).map(x=>'<span class="tile">'+x[1]+'</span>').join('')||'<span class="muted">As tuas medalhas aparecerão aqui.</span>';
+el('journey').innerHTML=['🌱 Aprender a poupar','🏪 Abrir um negócio','📊 Controlar receitas e despesas','🏦 Usar o banco com responsabilidade','👑 Construir o teu império'].map((x,i)=>'<div class="mission"><span>'+x+'</span><b>'+(level>i?'✅':'🔒')+'</b></div>').join('');
+
+el('products').innerHTML=s.items.map((p,i)=>`<div class="tile"><div class="row"><b>${p.name}</b><span>Stock: ${p.stock}</span></div><div class="muted">Custo por unidade: ${fmt(cost(p))} • O teu preço: ${fmt(p.price)} • Concorrente: ${fmt(p.competitor)}</div><button onclick="buy(${i})">Comprar 5 (${fmt(cost(p)*5)})</button><button class="alt" onclick="sell(${i})" ${p.stock<1?'disabled':''}>Vender 1 (${fmt(p.price)})</button><button class="alt" onclick="choose(${i})">Escolher preço</button></div>`).join('');
+el('supplier').value=String(s.selectedSupplier);
+el('supplierInfo').textContent=s.selectedSupplier===0?'Fornecedor A: preço mais baixo e qualidade normal.':'Fornecedor B: custa 18% mais, mas oferece qualidade superior.';
+el('competitor').textContent=s.items[chosen].name+' — loja vizinha: '+fmt(s.items[chosen].competitor);
+el('sellPrice').value=s.items[chosen].price;
+el('staffInfo').textContent=s.staff?'🐿️ Ajudante contratado. Salário pendente: 500 Kz.':'Ainda não tens ajudante.';
+el('hireBtn').disabled=s.staff||s.cash<1500;el('wageBtn').disabled=!s.staff||s.cash<500;
+el('branchInfo').textContent=s.branch?'🥤 Segunda loja aberta! A tua rede tem 2 lojas.':'Loja ainda fechada. Junta 5.000 Kz para abrir.';
+el('branchBtn').disabled=s.branch||s.cash<5000;
+el('missions').innerHTML=[
+['firstSale','Faz a primeira venda',s.missions.firstSale],['save','Guarda pelo menos 1.000 Kz',s.missions.save],['profit','Consegue 500 Kz de lucro líquido',s.missions.profit],['repay','Paga uma dívida',s.missions.repay]
+].map(m=>`<div class="mission"><span>${m[0]&&m[2]?'✅':'⬜'} ${m[1]}</span><b>${m[2]?'Concluída':'50 XP + 250 Kz'}</b></div>`).join('');
+el('investmentInfo').textContent=s.investment?`Investido: ${fmt(s.investment.amount)} • Disponível no dia ${s.investment.dueDay} • Retorno: ${fmt(s.investment.amount*1.1)}`:'Nenhum investimento ativo.';
+el('bankInfo').textContent='Juros recebidos até agora: '+fmt(s.bankInterest||0)+'.';
+el('loanInfo').textContent=s.debt>0?'Dívida a pagar: '+fmt(s.debt)+'. Paga assim que tiveres capacidade.':'Não tens dívidas neste momento.';
+}
+function buyLand(){
+ if(s.land||s.cash<3000){say('Precisas de 3.000 Kz e ainda não podes comprar este terreno.',false);return;}
+ s.cash-=3000;s.land=true;save();el('farmLesson').textContent='Terreno adquirido! Agora podes comprar sementes e cultivar.';
+}
+function buyGoat(){
+ if(s.goat||s.cash<2500){say('Precisas de 2.500 Kz para comprar a cabra.',false);return;}
+ s.cash-=2500;s.goat=true;s.goatLastMilkDay=s.day;save();el('farmLesson').textContent='A cabra chegou à quinta! A produção de leite será simulada a cada dois dias.';
+}
+function plantCrops(){
+ if(!s.land||s.crop||s.cash<300){say('Compra um terreno e garante 300 Kz para as sementes.',false);return;}
+ s.cash-=300;s.expenses+=300;s.crop={readyDay:s.day+2,quantity:5};save();el('farmLesson').textContent='Sementes plantadas! Espera dois dias de jogo para colher.';
+}
+function harvestCrops(){
+ if(!s.crop||s.day<s.crop.readyDay){say('A plantação ainda está a crescer. Espera mais um pouco.',false);return;}
+ s.cropStock=(s.cropStock||0)+s.crop.quantity;s.crop=null;s.xp+=15;save();el('farmLesson').textContent='Boa colheita! Recebeste 5 unidades para vender no mercado por 120 Kz cada.';
+}
+function sellCrops(){
+ const q=s.cropStock||0;if(q<1){say('Não tens colheita armazenada para vender.',false);return;}
+ const total=q*120;s.cropStock=0;s.cash+=total;s.revenue+=total;s.xp+=10;save();el('farmLesson').textContent='Vendeste '+q+' unidades por '+fmt(total)+'. Receita registada!';
+}
+function sellMilk(){
+ if((s.milkStock||0)<1){say('Ainda não tens leite para vender.',false);return;}
+ s.milkStock--;s.cash+=350;s.revenue+=350;s.xp+=5;save();el('farmLesson').textContent='Vendeste leite por 350 Kz. Regista a receita e cuida bem dos animais.';
+}
+function choose(i){chosen=i;render();say('Escolheste '+s.items[i].name+'. Observa o preço da loja vizinha e decide quanto cobrar.')}
+function setPrice(){let n=Math.floor(Number(el('sellPrice').value));if(!Number.isFinite(n)||n<=0){say('Escreve um preço válido.',false);return}s.items[chosen].price=n;save();say('Preço atualizado. Compara-o com o custo e com o concorrente.')}
+function buy(i){let p=s.items[i],c=cost(p)*5;if(s.cash<c){say('Não tens dinheiro suficiente. Poupa ou vende primeiro.',false);return}s.cash-=c;p.stock+=5;say('Compraste 5 unidades. O custo só entra no cálculo do lucro quando venderes a mercadoria.');save()}
+function sell(i){let p=s.items[i];if(!p.stock)return;let c=cost(p);p.stock--;s.cash+=p.price;s.revenue+=p.price;s.cogs+=c;say('Venda concluída! Receita: '+fmt(p.price)+'. Custo da mercadoria: '+fmt(c)+'. Lucro bruto: '+fmt(p.price-c)+'.');completeMission('firstSale','Primeira venda');if(s.revenue-s.cogs-s.expenses>=500)completeMission('profit','Lucro líquido de 500 Kz');save()}
+function hire(){if(s.staff||s.cash<1500)return;s.cash-=1500;s.expenses+=1500;s.staff=true;el('costLog').textContent='Contratação: 1.500 Kz. Lembra-te de pagar o salário.';say('Ajudante contratado! Gerir uma equipa também exige planeamento.');save()}
+function payWage(){if(!s.staff||s.cash<500)return;s.cash-=500;s.expenses+=500;el('costLog').textContent='Salário pago: 500 Kz.';say('Salário pago. Uma empresa responsável cumpre os seus compromissos.');save()}
+function payTransport(){if(s.cash<500){say('Dinheiro insuficiente para o transporte.',false);return}s.cash-=500;s.expenses+=500;el('costLog').textContent='Transporte pago: 500 Kz.';say('Transporte pago. Regista todas as despesas, mesmo as pequenas.');save()}
+function openBranch(){if(s.branch||s.cash<5000)return;s.cash-=5000;s.expenses+=5000;s.branch=true;say('A segunda loja abriu! Crescer é bom, mas exige capital e organização.');save()}
+function amount(id){let n=Math.floor(Number(el(id).value));return Number.isFinite(n)&&n>0?n:0}
+function deposit(){let n=amount('bankAmount');if(!n||n>s.cash){say('Valor inválido ou saldo insuficiente.',false);return}s.cash-=n;s.bank+=n;completeMission('save','Poupança iniciada');save();say('Depósito realizado: '+fmt(n)+'. Poupar ajuda-te a preparar o futuro.')}
+function withdraw(){let n=amount('bankAmount');if(!n||n>s.bank){say('Não tens saldo suficiente na poupança.',false);return}s.bank-=n;s.cash+=n;save();say('Levantaste '+fmt(n)+'. Usa a poupança com responsabilidade.')}
+function takeLoan(){let n=amount('loanAmount');if(!n||n>3000||s.debt>0){say('Podes pedir até 3.000 Kz e só quando não tens outra dívida.',false);return}s.cash+=n;s.debt=Math.ceil(n*1.05);save();say('Empréstimo recebido. Deves devolver '+fmt(s.debt)+'. Lembra-te: empréstimo não é lucro.')}
+function repayLoan(){if(!s.debt||s.cash<s.debt){say('Saldo insuficiente para pagar a dívida completa.',false);return}let n=s.debt;s.cash-=n;s.expenses+=n;s.debt=0;completeMission('repay','Dívida paga');save();say('Dívida paga: '+fmt(n)+'. Evitar juros e cumprir compromissos é uma boa decisão.')}
+function invest(){let n=amount('investmentAmount');if(s.investment||n<500||n>s.cash){say('Valor inválido, investimento ativo ou saldo insuficiente.',false);return}s.cash-=n;s.investment={amount:n,dueDay:s.day+3};save();say('Investimento iniciado. Volta depois de três dias para receber o retorno simulado.')}
+function collectInvestment(){if(!s.investment||s.day<s.investment.dueDay){say('Ainda não chegou o dia de receber o investimento.',false);return}let gain=Math.round(s.investment.amount*1.1);s.cash+=gain;s.revenue+=gain;s.investment=null;save();say('Investimento concluído: recebeste '+fmt(gain)+'. O retorno de 10% é apenas uma regra educativa do jogo, não uma promessa real.')}
+function nextDay(){s.day++;
+ if(s.goat&&s.day-(s.goatLastMilkDay||s.day)>=2){s.milkStock=(s.milkStock||0)+1;s.goatLastMilkDay=s.day;}
+if(s.bank>0){let interest=Math.floor(s.bank*.01);s.bank+=interest;s.bankInterest=(s.bankInterest||0)+interest;}if(s.staff&&s.cash>=500){s.cash-=500;s.expenses+=500;el('costLog').textContent='Salário diário pago: 500 Kz.';}if(s.bank>=1000)completeMission('save','Poupança iniciada');save();say('Dia '+s.day+' começou. Revê a tua carteira, poupança, stock e despesas.')}
+document.getElementById('supplier').addEventListener('change',e=>{s.selectedSupplier=Number(e.target.value);save();say('Fornecedor alterado. Compara o custo antes de comprar mercadoria.')});
+function resetGame(){if(confirm('Reiniciar a demonstração e apagar o progresso guardado?')){s=JSON.parse(JSON.stringify(base));chosen=0;localStorage.removeItem('mcmi_v09');el('costLog').textContent='Ainda não registaste despesas nesta sessão.';render();say('Começaste uma nova aventura de negócios!')}}
+render();
+
+// Versão de ficheiro único: funciona como site; instalação PWA offline requer ficheiros adicionais.
+</script></body></html>
